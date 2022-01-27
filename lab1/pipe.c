@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
             {
                 return errno;
             }
-            if (close(fd[0]) == -1 || close(fd[1]) == -1)
+            if (close(fd[0]) == -1)
             {
                 return errno;
             }
