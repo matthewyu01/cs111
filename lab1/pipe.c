@@ -9,21 +9,35 @@ int main(int argc, char *argv[])
     {
         return EINVAL;
     }
-    // int pipe(int fds[2]);
-
-    // dup2(fd,oldfd);
-    // char* cmd;
 
     else if (argc == 2)
     {
+        int wstatus;
         int pid = fork();
         if (pid == 0)
         {
-            execlp(argv[1], argv[1], (char *)NULL);
+            if (execlp(argv[1], argv[1], (char *)NULL) == -1)
+            {
+                return errno;
+            }
         }
         else if (pid > 0)
         {
-            wait(NULL);
+            if (wait(&wstatus) == -1)
+            {
+                return errno;
+            }
+
+            if (!WIFEXITED(wstatus))
+            {
+                return ECHILD;
+            }
+
+            int exit_status = WEXITSTATUS(wstatus);
+            if (exit_status)
+            {
+                return exit_status;
+            }
         }
         else
         {
@@ -34,12 +48,15 @@ int main(int argc, char *argv[])
     else if (argc == 3)
     {
         int fd[2]; // fd[0] for read, fd[1] for write
-        pipe(fd);
+        if (pipe(fd) == -1)
+        {
+            return errno;
+        }
         int wstatus;
 
         int pid = fork();
 
-        if (pid == 0) //child process
+        if (pid == 0) // child process
         {
             if (dup2(fd[1], STDOUT_FILENO) == -1)
             {
@@ -55,47 +72,90 @@ int main(int argc, char *argv[])
                 return errno;
             }
         }
-        else if (pid > 0) //parent process
+        else if (pid > 0) // parent process
         {
-            close(fd[1]);
+            if (close(fd[1]) == -1)
+            {
+                return errno;
+            }
             if (wait(&wstatus) == -1)
             {
                 return errno;
+            }
+
+            if (!WIFEXITED(wstatus))
+            {
+                return ECHILD;
+            }
+
+            int exit_status = WEXITSTATUS(wstatus);
+            if (exit_status)
+            {
+                return exit_status;
             }
         }
         else
         {
             return errno;
         }
-        //2nd commnad
-        pid = fork();
-        if (pid == 0) //child process
-        {
-            dup2(fd[0], STDIN_FILENO);
-            close(fd[0]);
-            close(fd[1]);
 
-            execlp(argv[2], argv[2], (char *)NULL);
-        }
-        else if (pid > 0) //parent process
+        // 2nd commnad
+        pid = fork();
+        if (pid == 0) // child process
         {
-            close(fd[0]);
-            wait(&wstatus);
+            if (dup2(fd[0], STDIN_FILENO) == -1)
+            {
+                return errno;
+            }
+            if (close(fd[0]) == -1 || close(fd[1]) == -1)
+            {
+                return errno;
+            }
+
+            if (execlp(argv[2], argv[2], (char *)NULL) == -1)
+            {
+                return errno;
+            }
+        }
+        else if (pid > 0) // parent process
+        {
+            if (close(fd[0]) == -1)
+            {
+                return errno;
+            }
+            if (wait(&wstatus) == -1)
+            {
+                return errno;
+            }
+
+            if (!WIFEXITED(wstatus))
+            {
+                return ECHILD;
+            }
+
+            int exit_status = WEXITSTATUS(wstatus);
+            if (exit_status)
+            {
+                return exit_status;
+            }
         }
         else
         {
             return errno;
         }
     }
-    else if (argc == 10)
+    else if (argc == 4)
     {
-        int fd[2][2]; // fd[0] for read, fd[1] for write
-        pipe(fd[0]);
+        int fd[2][2]; // fd[r][0] for read, fd[r][1] for write
+        if (pipe(fd[0]) == -1)
+        {
+            return errno;
+        }
 
         int wstatus;
         int pid = fork();
 
-        if (pid == 0) //child process
+        if (pid == 0) // child process
         {
             if (dup2(fd[0][1], STDOUT_FILENO) == -1)
             {
@@ -111,25 +171,40 @@ int main(int argc, char *argv[])
                 return errno;
             }
         }
-        else if (pid > 0) //parent process
+        else if (pid > 0) // parent process
         {
-            if (close(fd[0][1])){
+            if (close(fd[0][1]))
+            {
                 return errno;
             }
             if (wait(&wstatus) == -1)
             {
                 return errno;
             }
+
+            if (!WIFEXITED(wstatus))
+            {
+                return ECHILD;
+            }
+
+            int exit_status = WEXITSTATUS(wstatus);
+            if (exit_status)
+            {
+                return exit_status;
+            }
         }
         else
         {
             return errno;
         }
-        //2nd command
+        // 2nd command
 
-        pipe(fd[1]);
+        if (pipe(fd[1]) == -1)
+        {
+            return errno;
+        }
         pid = fork();
-        if (pid == 0) //child process
+        if (pid == 0) // child process
         {
             if (dup2(fd[0][0], STDIN_FILENO) == -1 || dup2(fd[1][1], STDOUT_FILENO) == -1)
             {
@@ -146,18 +221,34 @@ int main(int argc, char *argv[])
                 return errno;
             }
         }
-        else if (pid > 0) //parent process
+        else if (pid > 0) // parent process
         {
-            close(fd[0][0]);
-            close(fd[1][1]);
-            wait(&wstatus);
+            if (close(fd[0][0]) == -1 || close(fd[1][1]) == -1)
+            {
+                return errno;
+            }
+            if (wait(&wstatus) == -1)
+            {
+                return errno;
+            }
+
+            if (!WIFEXITED(wstatus))
+            {
+                return ECHILD;
+            }
+
+            int exit_status = WEXITSTATUS(wstatus);
+            if (exit_status)
+            {
+                return exit_status;
+            }
         }
         else
         {
             return errno;
         }
 
-        //3rd command
+        // 3rd command
         pid = fork();
         if (pid == 0)
         {
@@ -174,10 +265,27 @@ int main(int argc, char *argv[])
                 return errno;
             }
         }
-        else if (pid > 0) //parent process
+        else if (pid > 0) // parent process
         {
-            close(fd[1][0]);
-            wait(&wstatus);
+            if (close(fd[1][0]))
+            {
+                return errno;
+            }
+            if (wait(&wstatus) == -1)
+            {
+                return errno;
+            }
+
+            if (!WIFEXITED(wstatus))
+            {
+                return ECHILD;
+            }
+
+            int exit_status = WEXITSTATUS(wstatus);
+            if (exit_status)
+            {
+                return exit_status;
+            }
         }
         else
         {
@@ -187,14 +295,18 @@ int main(int argc, char *argv[])
 
     else
     {
-        printf("%d", argc-2);
-        int fd[argc - 2][2]; // fd[0] for read, fd[1] for write
-        pipe(fd[0]);
+        int fd[argc - 2][2]; // fd[r][0] for read, fd[r][1] for write
+
+        // first command
+        if (pipe(fd[0]) == -1)
+        {
+            return errno;
+        }
 
         int wstatus;
         int pid = fork();
 
-        if (pid == 0) //child process
+        if (pid == 0) // child process
         {
             if (dup2(fd[0][1], STDOUT_FILENO) == -1)
             {
@@ -210,7 +322,7 @@ int main(int argc, char *argv[])
                 return errno;
             }
         }
-        else if (pid > 0) //parent process
+        else if (pid > 0) // parent process
         {
             if (close(fd[0][1]) == -1)
             {
@@ -220,26 +332,39 @@ int main(int argc, char *argv[])
             {
                 return errno;
             }
+
+            if (!WIFEXITED(wstatus))
+            {
+                return ECHILD;
+            }
+
+            int exit_status = WEXITSTATUS(wstatus);
+            if (exit_status)
+            {
+                return exit_status;
+            }
         }
         else
         {
             return errno;
         }
-        //middle commands
+        // inner commands
         int i = 1;
         while (i < argc - 2)
         {
-            printf("%d\n", i);
-            pipe(fd[i]);
+            if (pipe(fd[i]))
+            {
+                return errno;
+            }
             pid = fork();
-            if (pid == 0) //child process
+            if (pid == 0) // child process
             {
                 if (dup2(fd[i - 1][0], STDIN_FILENO) == -1 || dup2(fd[i][1], STDOUT_FILENO) == -1)
                 {
                     return errno;
                 }
 
-                if (close(fd[i - 1][0]) == -1 || close(fd[i - 1][1]) == -1 || close(fd[i][1]) == -1)
+                if (close(fd[i - 1][0]) == -1 || close(fd[i][0]) == -1 || close(fd[i][1]) == -1)
                 {
                     return errno;
                 }
@@ -249,13 +374,27 @@ int main(int argc, char *argv[])
                     return errno;
                 }
             }
-            else if (pid > 0) //parent process
+            else if (pid > 0) // parent process
             {
                 if (close(fd[i - 1][0]) == -1 || close(fd[i][1]) == -1)
                 {
                     return errno;
                 }
-                wait(&wstatus);
+                if (wait(&wstatus) == -1)
+                {
+                    return errno;
+                }
+
+                if (!WIFEXITED(wstatus))
+                {
+                    return ECHILD;
+                }
+
+                int exit_status = WEXITSTATUS(wstatus);
+                if (exit_status)
+                {
+                    return exit_status;
+                }
                 i++;
             }
             else
@@ -264,32 +403,46 @@ int main(int argc, char *argv[])
             }
         }
 
-        //last command
+        // last command
         pid = fork();
         if (pid == 0)
         {
-            if (dup2(fd[2][0], STDIN_FILENO) == -1)
+            if (dup2(fd[i - 1][0], STDIN_FILENO) == -1)
             {
                 return errno;
             }
-            if (close(fd[2][0]) == -1)
+            if (close(fd[i - 1][0]) == -1)
             {
                 return errno;
             }
 
-            if (execlp(argv[4], argv[4], (char *)NULL) == -1)
+            if (execlp(argv[i + 1], argv[i + 1], (char *)NULL) == -1)
             {
                 return errno;
             }
         }
-        else if (pid > 0) //parent process
+        else if (pid > 0) // parent process
         {
-            if (close(fd[2][0]) == -1)
+            if (close(fd[i - 1][0]) == -1)
             {
-                perror("");
                 return errno;
             }
-            wait(&wstatus);
+
+            if (wait(&wstatus) == -1)
+            {
+                return errno;
+            }
+
+            if (!WIFEXITED(wstatus))
+            {
+                return ECHILD;
+            }
+
+            int exit_status = WEXITSTATUS(wstatus);
+            if (exit_status)
+            {
+                return exit_status;
+            }
         }
         else
         {
