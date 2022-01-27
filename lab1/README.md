@@ -1,15 +1,24 @@
 # Pipe Up
 
-One sentence description
+**Program that implements the shell pipe operator (|)**
 
 ## Building
 
-Explain briefly how to build your program
+To build the progarm, type
+`make`
 
 ## Running
 
-Show an example run of your program, using at least two additional arguments, and what to expect
+To run the program, type
+`./pipe CMD1 [CMD2] [CMD3] ...` with at least one command
+
+Example:
+
+`./pipe ls cat` should be equivalent to `ls | cat`
+
+This should list all your files in your current working directory and concatenate them.
 
 ## Cleaning up
 
-Explain briefly how to clean up all binary files
+To clean up the program and object files, type
+`make clean`
