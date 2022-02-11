@@ -1,16 +1,28 @@
 # You Spin Me Round Robin
 
-One line description of this code.
+**Program that simulates Round Robin scheduling of processes**
 
 ## Building
 
-Explain briefly how to build your program.
+To build the program, type
+`make`
 
 ## Running
 
-Show an example run of your program on the given `processes.txt` with whatever
-quantum length you want. Show the output you should expect.
+To run the program, type
+`./rr [FILE] [INTEGER]` where the INTEGER >= 1
+
+This should print out the average waiting and response times for the given processes.
+
+Example:
+
+`./rr processes.txt 3` 
+
+    Average waiting time: 7.00
+    Average response time: 2.75
+
 
 ## Cleaning up
 
-Explain briefly how to clean up all binary files.
+To clean up the program and object files, type
+`make clean`
