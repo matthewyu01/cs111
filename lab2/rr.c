@@ -202,14 +202,14 @@ int main(int argc, char *argv[])
   {
     if (data[i].arrival_time == time)
     {
-      struct process *new_node = malloc(sizeof(struct process));
-      new_node->pid = data[i].pid;
-      new_node->burst_time = data[i].burst_time;
-      new_node->arrival_time = data[i].arrival_time;
-      new_node->response_time = 389525;
-      new_node->time_left = data[i].burst_time;
+      // struct process *new_node = malloc(sizeof(struct process));
+      // new_node->pid = data[i].pid;
+      // new_node->burst_time = data[i].burst_time;
+      // new_node->arrival_time = data[i].arrival_time;
+      // new_node->response_time = 389525;
+      // new_node->time_left = data[i].burst_time;
 
-      TAILQ_INSERT_TAIL(&list, new_node, pointers);
+      TAILQ_INSERT_TAIL(&list, &data[i], pointers);
       list_length++;
       left++;
     }
@@ -240,14 +240,14 @@ int main(int argc, char *argv[])
     {
       if (data[i].arrival_time <= time)
       {
-        struct process *new_node = malloc(sizeof(struct process));
-        new_node->pid = data[i].pid;
-        new_node->burst_time = data[i].burst_time;
-        new_node->arrival_time = data[i].arrival_time;
-        new_node->response_time = 389525;
-        new_node->time_left = data[i].burst_time;
+        // struct process *new_node = malloc(sizeof(struct process));
+        // new_node->pid = data[i].pid;
+        // new_node->burst_time = data[i].burst_time;
+        // new_node->arrival_time = data[i].arrival_time;
+        // new_node->response_time = 389525;
+        // new_node->time_left = data[i].burst_time;
 
-        TAILQ_INSERT_TAIL(&list, new_node, pointers);
+        TAILQ_INSERT_TAIL(&list, &data[i], pointers);
         list_length++;
         left++;
       }
