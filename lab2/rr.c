@@ -23,7 +23,7 @@ struct process
 
   /* Additional fields here */
 
-  u32 response_time;
+  bool response_time;
   u32 time_left;
 
   /* End of "Additional fields here" */
@@ -140,6 +140,8 @@ void init_processes(const char *path,
     (*process_data)[i].pid = next_int(&data, data_end);
     (*process_data)[i].arrival_time = next_int(&data, data_end);
     (*process_data)[i].burst_time = next_int(&data, data_end);
+    (*process_data)[i].response_time = false;
+    (*process_data)[i].time_left = (*process_data)[i].burst_time;
   }
 
   munmap((void *)data, size);
@@ -202,13 +204,6 @@ int main(int argc, char *argv[])
   {
     if (data[i].arrival_time == time)
     {
-      // struct process *new_node = malloc(sizeof(struct process));
-      // new_node->pid = data[i].pid;
-      // new_node->burst_time = data[i].burst_time;
-      // new_node->arrival_time = data[i].arrival_time;
-      // new_node->response_time = 389525;
-      // new_node->time_left = data[i].burst_time;
-
       TAILQ_INSERT_TAIL(&list, &data[i], pointers);
       list_length++;
       left++;
@@ -221,10 +216,10 @@ int main(int argc, char *argv[])
   {
     curr = TAILQ_FIRST(&list);
 
-    if (curr->response_time == 389525)
+    if (curr->response_time == false)
     { // if response time for a node hasn't been calculated already
-      curr->response_time = time - curr->arrival_time;
-      total_response_time += curr->response_time;
+      curr->response_time = true;
+      total_response_time += time - curr->arrival_time;
     }
 
     time_slice = quantum_length; // quantum length or remaining time left
@@ -240,13 +235,6 @@ int main(int argc, char *argv[])
     {
       if (data[i].arrival_time <= time)
       {
-        // struct process *new_node = malloc(sizeof(struct process));
-        // new_node->pid = data[i].pid;
-        // new_node->burst_time = data[i].burst_time;
-        // new_node->arrival_time = data[i].arrival_time;
-        // new_node->response_time = 389525;
-        // new_node->time_left = data[i].burst_time;
-
         TAILQ_INSERT_TAIL(&list, &data[i], pointers);
         list_length++;
         left++;
@@ -266,7 +254,6 @@ int main(int argc, char *argv[])
       total_waiting_time += waiting_time;
       // Remove node
       TAILQ_REMOVE(&list, curr, pointers);
-      // free(curr);
     }
 
     curr = TAILQ_NEXT(curr, pointers);
