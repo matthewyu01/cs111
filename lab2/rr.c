@@ -194,10 +194,10 @@ int main(int argc, char *argv[])
     }
   }
 
-  u32 left = 0;                // number of processes that have been added to list
-  time = data[0].arrival_time; // set to first arrival time
 
-  u32 list_length = 0;
+  u32 left = 0; // number of processes that have been added to list
+  u32 completed = 0;
+  time = data[0].arrival_time; // set to first arrival time
 
   // Add first nodes to linked list
   for (u32 i = 0; i < size; i++)
@@ -205,15 +205,35 @@ int main(int argc, char *argv[])
     if (data[i].arrival_time == time)
     {
       TAILQ_INSERT_TAIL(&list, &data[i], pointers);
-      list_length++;
       left++;
     }
   }
 
+
+
   u32 time_slice;
 
-  while (!TAILQ_EMPTY(&list))
+  while (completed < size)
   {
+    if (TAILQ_EMPTY(&list))
+    {
+      // Add nodes to linked list if list is empty
+      time = data[left].arrival_time; // jump to next arrival time
+
+      for (u32 i = left; i < size; i++)
+      {
+        if (data[i].arrival_time == time)
+        {
+          TAILQ_INSERT_TAIL(&list, &data[i], pointers);
+          left++;
+        }
+        else
+        {
+          break;
+        }
+      }
+    }
+
     curr = TAILQ_FIRST(&list);
 
     if (curr->response_time == false)
@@ -236,7 +256,6 @@ int main(int argc, char *argv[])
       if (data[i].arrival_time <= time)
       {
         TAILQ_INSERT_TAIL(&list, &data[i], pointers);
-        list_length++;
         left++;
       }
     }
@@ -248,15 +267,15 @@ int main(int argc, char *argv[])
       TAILQ_REMOVE(&list, curr, pointers);
       TAILQ_INSERT_TAIL(&list, temp, pointers);
     }
-    else
+    else // Process finishes
     {
       u32 waiting_time = time - curr->arrival_time - curr->burst_time;
       total_waiting_time += waiting_time;
       // Remove node
       TAILQ_REMOVE(&list, curr, pointers);
+      completed++;
     }
 
-    curr = TAILQ_NEXT(curr, pointers);
   }
 
   /* End of "Your code here" */
