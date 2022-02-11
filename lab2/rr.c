@@ -18,12 +18,13 @@ struct process
   u32 arrival_time;
   u32 burst_time;
 
-  TAILQ_ENTRY(process) pointers;
+  TAILQ_ENTRY(process)
+  pointers;
 
   /* Additional fields here */
 
-  u32 wait_time;
   u32 response_time;
+  u32 time_left;
 
   /* End of "Additional fields here" */
 };
@@ -170,26 +171,18 @@ int main(int argc, char *argv[])
 
   // TAILQ_INSERT_TAIL(&list, new_node, pointers);
 
-  // TAILQ_REMOVE(&list, new_node, pointers);
   // free(new_node);
-  // int time = 0;
 
-  // TAILQ_FIRST(&list);
-  // // last
   // TAILQ_LAST(&list, process_list);
 
   struct process *curr;
-  struct process *next;
 
-  int time = 0;
-
-  int first_arrival_time = data[0].arrival_time;
-
+  u32 time = 0;
 
   // Sort by arrival time + PID
-  for (int i = 0; i < size; i++)
+  for (u32 i = 0; i < size; i++)
   {
-    for (int j = i + 1; j < size; j++)
+    for (u32 j = i + 1; j < size; j++)
     {
       if (data[i].arrival_time > data[j].arrival_time)
       {
@@ -209,25 +202,18 @@ int main(int argc, char *argv[])
     }
   }
 
-  for (int i = 0; i < size; i++)
-  {
-    printf("%d ", data[i].pid);
-  }
+  // for (u32 i = 0; i < size; i++)
+  // {
+  //   // printf("PID: %d Arrival: %d BursT: %d \n", data[i].pid, data[i].arrival_time, data[i].burst_time);
+  // }
 
-  // Iterate through data to find first arrival time
-  for (int i = 1; i < size; i++)
-  {
-    if (data[i].arrival_time < first_arrival_time)
-    {
-      first_arrival_time = data[i].arrival_time;
-    }
-  }
+  u32 left = 0;
+  time = data[0].arrival_time; // set to first arrival time
 
-  int left = 0;
-  time = first_arrival_time; // set time to first time
+  u32 list_length = 0;
 
   // Add first nodes to linked list
-  for (int i = 0; i < size; i++)
+  for (u32 i = 0; i < size; i++)
   {
     if (data[i].arrival_time == time)
     {
@@ -235,39 +221,83 @@ int main(int argc, char *argv[])
       new_node->pid = data[i].pid;
       new_node->burst_time = data[i].burst_time;
       new_node->arrival_time = data[i].arrival_time;
-      new_node->wait_time = 0;
-      new_node->response_time = 0;
+      new_node->response_time = 389525;
+      new_node->time_left = data[i].burst_time;
 
       TAILQ_INSERT_TAIL(&list, new_node, pointers);
+      list_length++;
+      left++;
     }
   }
 
-  int time_slice = quantum_length; // or remaining time
-  time += time_slice;
-  while (false && !TAILQ_EMPTY(&list))
+  // for (curr = TAILQ_FIRST(&list); curr != NULL; curr = next)
+  // {
+  //   // printf("PID: %d Arrival: %d Burst: %d \n", curr->pid, curr->arrival_time, curr->burst_time);
+
+  //   next = TAILQ_NEXT(curr, pointers);
+  // }
+  // printf("PID: \n\n");
+
+  u32 time_slice;
+
+  while (!TAILQ_EMPTY(&list))
   {
-    // add nodes to linked list
-    for (int i = left; i < size; i++)
+
+    curr = TAILQ_FIRST(&list);
+
+    if (curr->response_time == 389525)
+    { // if response time for a node hasn't been calculated already
+      curr->response_time = time - curr->arrival_time;
+      total_response_time += curr->response_time;
+    }
+
+    time_slice = quantum_length; // or remaining time in current process
+    if (curr->time_left <= time_slice)
     {
-      if (data[i].arrival_time == time)
+      time_slice = curr->time_left;
+    }
+    curr->time_left -= time_slice;
+    time += time_slice;
+    // printf("Time: %d PID: %d Time Left: %d Burst: %d \n", time, curr->pid, curr->time_left, curr->burst_time);
+
+    // add nodes to linked list
+    for (u32 i = left; i < size; i++)
+    {
+      if (data[i].arrival_time <= time)
       {
         struct process *new_node = malloc(sizeof(struct process));
         new_node->pid = data[i].pid;
         new_node->burst_time = data[i].burst_time;
         new_node->arrival_time = data[i].arrival_time;
-        new_node->wait_time = 0;
-        new_node->response_time = 0;
+        new_node->response_time = 389525;
+        new_node->time_left = data[i].burst_time;
 
         TAILQ_INSERT_TAIL(&list, new_node, pointers);
+        list_length++;
+        left++;
       }
     }
-    for (curr = TAILQ_FIRST(&list); curr != NULL; curr = next)
+
+    if (curr->time_left > 0)
     {
-      time += quantum_length;
-      next = TAILQ_NEXT(curr, pointers);
-      // TAILQ_REMOVE(&list, curr, pointers);
+      // Move node to end of linked list
+      struct process *temp = curr;
+      TAILQ_REMOVE(&list, curr, pointers);
+      // free(curr);
+      TAILQ_INSERT_TAIL(&list, temp, pointers);
+    }
+    else
+    {
+      //    printf("PID: %d Time: %d\n", curr->pid, time);
+      u32 waiting_time = time - curr->arrival_time - curr->burst_time;
+      //      printf("Wait: %d\n", waiting_time);
+      total_waiting_time += waiting_time;
+      // Remove node
+      TAILQ_REMOVE(&list, curr, pointers);
       // free(curr);
     }
+
+    curr = TAILQ_NEXT(curr, pointers);
   }
 
   /* End of "Your code here" */
