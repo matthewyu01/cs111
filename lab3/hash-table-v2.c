@@ -30,16 +30,17 @@ struct hash_table_v2
 
 struct hash_table_v2 *hash_table_v2_create()
 {
+    int error_check;
     struct hash_table_v2 *hash_table = calloc(1, sizeof(struct hash_table_v2));
     assert(hash_table != NULL);
     for (size_t i = 0; i < HASH_TABLE_CAPACITY; ++i)
     {
         struct hash_table_entry *entry = &hash_table->entries[i];
         SLIST_INIT(&entry->list_head);
-        if (pthread_mutex_init(&(my_mutexes[i]), NULL))
+        error_check = pthread_mutex_init(&(my_mutexes[i]), NULL);
+        if (error_check != 0)
         {
-            // exit(EXIT_FAILURE); ?
-            return;
+            exit(error_check);
         }
     }
     return hash_table;
@@ -90,10 +91,10 @@ void hash_table_v2_add_entry(struct hash_table_v2 *hash_table,
     struct list_entry *list_entry = get_list_entry(hash_table, key, list_head);
 
     uint32_t index = bernstein_hash(key) % HASH_TABLE_CAPACITY;
-    if (pthread_mutex_lock(&(my_mutexes[index])))
+    int error_check = pthread_mutex_lock(&(my_mutexes[index]));
+    if (error_check != 0)
     {
-        // exit(EXIT_FAILURE); ?
-        return;
+        exit(error_check);
     }
 
     /* Update the value if it already exists */
@@ -108,10 +109,10 @@ void hash_table_v2_add_entry(struct hash_table_v2 *hash_table,
     list_entry->value = value;
     SLIST_INSERT_HEAD(list_head, list_entry, pointers); // dangerous
 
-    if (pthread_mutex_unlock(&(my_mutexes[index])))
+    error_check = pthread_mutex_unlock(&(my_mutexes[index]));
+    if (error_check != 0)
     {
-        // exit(EXIT_FAILURE); ?
-        return;
+        exit(error_check);
     }
 }
 
@@ -127,6 +128,8 @@ uint32_t hash_table_v2_get_value(struct hash_table_v2 *hash_table,
 
 void hash_table_v2_destroy(struct hash_table_v2 *hash_table)
 {
+    int error_check = 0;
+
     for (size_t i = 0; i < HASH_TABLE_CAPACITY; ++i)
     {
         struct hash_table_entry *entry = &hash_table->entries[i];
@@ -137,8 +140,10 @@ void hash_table_v2_destroy(struct hash_table_v2 *hash_table)
             list_entry = SLIST_FIRST(list_head);
             SLIST_REMOVE_HEAD(list_head, pointers);
             free(list_entry);
-            if (pthread_mutex_destroy(&(my_mutexes[i])))
+            error_check = pthread_mutex_destroy(&(my_mutexes[i]));
+            if (error_check)
             { // frees memory
+                exit(error_check);
             }
         }
     }
