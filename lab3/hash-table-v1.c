@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/queue.h>
-
 #include <pthread.h>
 
 struct list_entry
@@ -19,7 +18,6 @@ SLIST_HEAD(list_head, list_entry);
 
 pthread_mutex_t my_mutex;
 
-
 struct hash_table_entry
 {
     struct list_head list_head;
@@ -32,7 +30,12 @@ struct hash_table_v1
 
 struct hash_table_v1 *hash_table_v1_create()
 {
-    pthread_mutex_init(&my_mutex, NULL);
+    int error_check;
+    error_check = pthread_mutex_init(&my_mutex, NULL);
+    if (error_check != 0)
+    {
+        exit(error_check);
+    }
     struct hash_table_v1 *hash_table = calloc(1, sizeof(struct hash_table_v1));
     assert(hash_table != NULL);
     for (size_t i = 0; i < HASH_TABLE_CAPACITY; ++i)
@@ -83,10 +86,14 @@ void hash_table_v1_add_entry(struct hash_table_v1 *hash_table,
                              const char *key,
                              uint32_t value)
 {
+    int error_check;
 
-    pthread_mutex_lock(&my_mutex);
+    error_check = pthread_mutex_lock(&my_mutex);
 
-    // if any don't reutnr 0, exit with error code
+    if (error_check != 0)
+    {
+        exit(error_check);
+    }
 
     struct hash_table_entry *hash_table_entry = get_hash_table_entry(hash_table, key);
     struct list_head *list_head = &hash_table_entry->list_head;
@@ -96,7 +103,12 @@ void hash_table_v1_add_entry(struct hash_table_v1 *hash_table,
     if (list_entry != NULL)
     {
         list_entry->value = value;
-        pthread_mutex_unlock(&my_mutex);
+
+        error_check = pthread_mutex_unlock(&my_mutex);
+        if (error_check != 0)
+        {
+            exit(error_check);
+        }
         return;
     }
 
@@ -104,7 +116,12 @@ void hash_table_v1_add_entry(struct hash_table_v1 *hash_table,
     list_entry->key = key;
     list_entry->value = value;
     SLIST_INSERT_HEAD(list_head, list_entry, pointers);
-    pthread_mutex_unlock(&my_mutex);
+
+    error_check = pthread_mutex_unlock(&my_mutex);
+    if (error_check)
+    {
+        exit(error_check);
+    }
 }
 
 uint32_t hash_table_v1_get_value(struct hash_table_v1 *hash_table,
@@ -133,5 +150,10 @@ void hash_table_v1_destroy(struct hash_table_v1 *hash_table)
     }
     free(hash_table);
 
-    pthread_mutex_destroy(&my_mutex); // frees memory
+    int error_check = pthread_mutex_destroy(&my_mutex);
+
+    if (error_check != 0)
+    { // frees memory
+        exit(error_check);
+    }
 }
