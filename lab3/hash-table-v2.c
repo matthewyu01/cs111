@@ -86,16 +86,18 @@ void hash_table_v2_add_entry(struct hash_table_v2 *hash_table,
                              const char *key,
                              uint32_t value)
 {
-    struct hash_table_entry *hash_table_entry = get_hash_table_entry(hash_table, key);
-    struct list_head *list_head = &hash_table_entry->list_head;
-    struct list_entry *list_entry = get_list_entry(hash_table, key, list_head);
 
     uint32_t index = bernstein_hash(key) % HASH_TABLE_CAPACITY;
+
     int error_check = pthread_mutex_lock(&(my_mutexes[index]));
     if (error_check != 0)
     {
         exit(error_check);
     }
+
+    struct hash_table_entry *hash_table_entry = get_hash_table_entry(hash_table, key);
+    struct list_head *list_head = &hash_table_entry->list_head;
+    struct list_entry *list_entry = get_list_entry(hash_table, key, list_head);
 
     /* Update the value if it already exists */
     if (list_entry != NULL)
