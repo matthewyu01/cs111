@@ -69,48 +69,49 @@ different linked list in the hash table.
 
 ##### Here is an example output testing various thread counts
 
-    ./hash-table-tester -t 8 -s 40000
-    Generation: 53,379 usec
-    Hash table base: 598,542 usec
-    - 0 missing
-    Hash table v1: 757,637 usec
-    - 0 missing
-    Hash table v2: 244,634 usec
-    - 0 missing
+```./hash-table-tester -t 8 -s 40000
+Generation: 53,379 usec
+Hash table base: 598,542 usec
+- 0 missing
+Hash table v1: 757,637 usec
+- 0 missing
+Hash table v2: 124,634 usec
+- 0 missing
 
-    ./hash-table-tester -t 4 -s 80000
-    Generation: 52,794 usec
-    Hash table base: 580,141 usec
-    - 0 missing
-    Hash table v1: 895,672 usec
-    - 0 missing
-    Hash table v2: 258,009 usec
-    - 0 missing
+./hash-table-tester -t 4 -s 80000
+Generation: 52,794 usec
+Hash table base: 580,141 usec
+- 0 missing
+Hash table v1: 895,672 usec
+- 0 missing
+Hash table v2: 258,009 usec
+- 0 missing
 
-    ./hash-table-tester -t 2 -s 160000
-    Generation: 53,247 usec
-    Hash table base: 621,712 usec
-    - 0 missing
-    Hash table v1: 859,215 usec
-    - 0 missing
-    Hash table v2: 387,859 usec
-    - 0 missing
+./hash-table-tester -t 2 -s 160000
+Generation: 53,247 usec
+Hash table base: 621,712 usec
+- 0 missing
+Hash table v1: 859,215 usec
+- 0 missing
+Hash table v2: 387,859 usec
+- 0 missing
 
-    ./hash-table-tester -t 1 -s 320000
-    Generation: 53,880 usec
-    Hash table base: 855,509 usec
-    - 0 missing
-    Hash table v1: 1,098,966 usec
-    - 0 missing
-    Hash table v2: 1,281,652 usec
-    - 0 missing
+./hash-table-tester -t 1 -s 320000
+Generation: 53,880 usec
+Hash table base: 855,509 usec
+- 0 missing
+Hash table v1: 1,098,966 usec
+- 0 missing
+Hash table v2: 1,281,652 usec
+- 0 missing
+```
 
 **Observations:**
 
 Processing the same number of entries (320000), v2 speeds 
 up if we add more threads. Going from 1 to 2 to 4 to 8, the 
 time speeds up from 1.2 million to 387,000 to 258,000 to 
-244,000.
+124,000.
 
 When the thread count is one, v2 usually performs the 
 slowest since it has the most overhead to due having 
@@ -123,4 +124,5 @@ so it runs slower than the base table due to the overhead for
 the mutex. 
 
 When the thread count is greater than 1, v2 typically runs
-(n-2) to (n-1) faster than the base table.
+(n-3) to (n-1) faster than the base table.
+
