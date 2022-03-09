@@ -405,16 +405,15 @@ void write_inode_table(int fd) {
                         | EXT2_S_IWUSR
                         | EXT2_S_IRGRP
                         | EXT2_S_IROTH;
-    hello_inode.i_uid = 0;
+    hello_inode.i_uid = 1000;
     hello_inode.i_size = 11;
     hello_inode.i_atime = current_time;
     hello_inode.i_ctime = current_time;
     hello_inode.i_mtime = current_time;
     hello_inode.i_dtime = 0;
-    hello_inode.i_gid = 0;
+    hello_inode.i_gid = 1000;
     hello_inode.i_links_count = 1;
     hello_inode.i_blocks = 0; // hello inode should be 0 i_blocks
-    hello_inode.i_block[0] = HELLO_WORLD_FILE_BLOCKNO;
     write_inode(fd, HELLO_INO, &hello_inode);
 
 }
@@ -453,7 +452,11 @@ void write_root_dir_block(int fd) {
 
 	bytes_remaining -= hello_world_entry.rec_len;
 
+    struct ext2_dir_entry hello_entry = {0};
+	dir_entry_set(hello_entry, HELLO_INO, "hello");
+	dir_entry_write(hello_entry, fd);
 
+	bytes_remaining -= hello_entry.rec_len;
 	
 
 
