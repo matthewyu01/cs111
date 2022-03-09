@@ -400,6 +400,11 @@ void write_inode_table(int fd) {
     write_inode(fd, HELLO_WORLD_INO, &hello_world_inode);
 
     struct ext2_inode hello_inode = {0};
+    hello_inode.i_mode = EXT2_S_IFLNK
+                        | EXT2_S_IRUSR
+                        | EXT2_S_IWUSR
+                        | EXT2_S_IRGRP
+                        | EXT2_S_IROTH;
     hello_inode.i_uid = 0;
     hello_inode.i_size = 1024;
     hello_inode.i_atime = current_time;
@@ -416,7 +421,7 @@ void write_inode_table(int fd) {
 
 void write_root_dir_block(int fd) {
 	/* This is all you */
-		off_t off = BLOCK_OFFSET(ROOT_DIR_BLOCKNO);
+	off_t off = BLOCK_OFFSET(ROOT_DIR_BLOCKNO);
 	off = lseek(fd, off, SEEK_SET);
 	if (off == -1) {
 		errno_exit("lseek");
@@ -435,6 +440,13 @@ void write_root_dir_block(int fd) {
 	dir_entry_write(parent_entry, fd);
 
 	bytes_remaining -= parent_entry.rec_len;
+
+    struct ext2_dir_entry lost_and_found_entry = {0};
+	dir_entry_set(lost_and_found_entry, LOST_AND_FOUND_INO, "lost+found");
+	dir_entry_write(lost_and_found_entry, fd);
+
+	bytes_remaining -= lost_and_found_entry.rec_len;
+
 
 	struct ext2_dir_entry fill_entry = {0};
 	fill_entry.rec_len = bytes_remaining;
