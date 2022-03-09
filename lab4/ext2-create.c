@@ -387,13 +387,13 @@ void write_inode_table(int fd) {
                             | EXT2_S_IWUSR
                             | EXT2_S_IRGRP
                             | EXT2_S_IROTH;
-    hello_world_inode.i_uid = 0;
-    hello_world_inode.i_size = 1024;
+    hello_world_inode.i_uid = 1000;
+    hello_world_inode.i_size = 12;
     hello_world_inode.i_atime = current_time;
     hello_world_inode.i_ctime = current_time;
     hello_world_inode.i_mtime = current_time;
     hello_world_inode.i_dtime = 0;
-    hello_world_inode.i_gid = 0;
+    hello_world_inode.i_gid = 1000;
     hello_world_inode.i_links_count = 1;
     hello_world_inode.i_blocks = 2; /* These are oddly 512 blocks */
     hello_world_inode.i_block[0] = HELLO_WORLD_FILE_BLOCKNO;
@@ -406,7 +406,7 @@ void write_inode_table(int fd) {
                         | EXT2_S_IRGRP
                         | EXT2_S_IROTH;
     hello_inode.i_uid = 0;
-    hello_inode.i_size = 1024;
+    hello_inode.i_size = 11;
     hello_inode.i_atime = current_time;
     hello_inode.i_ctime = current_time;
     hello_inode.i_mtime = current_time;
@@ -446,6 +446,15 @@ void write_root_dir_block(int fd) {
 	dir_entry_write(lost_and_found_entry, fd);
 
 	bytes_remaining -= lost_and_found_entry.rec_len;
+
+    struct ext2_dir_entry hello_world_entry = {0};
+	dir_entry_set(hello_world_entry, HELLO_WORLD_INO, "hello-world");
+	dir_entry_write(hello_world_entry, fd);
+
+	bytes_remaining -= hello_world_entry.rec_len;
+
+
+	
 
 
 	struct ext2_dir_entry fill_entry = {0};
