@@ -275,20 +275,25 @@ void write_block_group_descriptor_table(int fd) {
 void write_block_bitmap(int fd)
 {
     /* This is all you */
-    off_t off = lseek(fd, BLOCK_OFFSET(BLOCK_BITMAP_BLOCKNO), SEEK_SET);
-    if (off == -1)
-    {
-        errno_exit("lseek");
+    off_t off = lseek(fd, BLOCK_OFFSET(3), SEEK_SET);
+	if (off == -1) {
+		errno_exit("lseek");
+	}
+//bitmap[256] = {0x7FFFFF,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0xFF};
+    u32 bitmap[256] = {0x7FFFFF};
+
+    for (unsigned int i = 1; i < 32; i++){
+    bitmap[i] = 0;
     }
 
-    struct ext2_block_group_descriptor block_bitmap_descriptor = {0xFF, 0xFF, 0xFF};
-
-
-    ssize_t size = sizeof(block_bitmap_descriptor);
-    if (write(fd, &block_bitmap_descriptor, size) != size)
-    {
-        errno_exit("write");
+    for (unsigned int i = 32; i < 256; i++){
+    bitmap[i] = 0xFFFFFFFF;
     }
+    ssize_t size = sizeof(bitmap);
+    if (write(fd, bitmap, size) != size) {
+    errno_exit("write");
+}
+
 }
 
 
