@@ -216,7 +216,7 @@ void write_superblock(int fd) {
 	superblock.s_errors            = 1; /* Ignore the error (continue on) */
 	superblock.s_minor_rev_level   = 0; /* Leave this as 0 */
 	superblock.s_lastcheck         = 0; /* Last check time */
-	superblock.s_checkinterval     = 0; /* Force checks by making them every 1 second */
+	superblock.s_checkinterval     = 1; /* Force checks by making them every 1 second */
 	superblock.s_creator_os        = 0; /* Linux */
 	superblock.s_rev_level         = 0; /* Leave this as 0 */
 	superblock.s_def_resuid        = 0; /* root */
