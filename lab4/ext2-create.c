@@ -213,7 +213,7 @@ void write_superblock(int fd) {
 	superblock.s_max_mnt_count     = -1; /* Make this unlimited */
 	superblock.s_magic             = 0xEF53; /* ext2 Signature */
 	superblock.s_state             = 1; /* File system is clean */
-	superblock.s_errors            = 0; /* Ignore the error (continue on) */
+	superblock.s_errors            = 1; /* Ignore the error (continue on) */
 	superblock.s_minor_rev_level   = 0; /* Leave this as 0 */
 	superblock.s_lastcheck         = 0; /* Last check time */
 	superblock.s_checkinterval     = 0; /* Force checks by making them every 1 second */
