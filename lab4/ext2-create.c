@@ -196,22 +196,22 @@ void write_superblock(int fd) {
 
 	/* These are intentionally incorrectly set as 0, you should set them
 	   correctly and delete this comment */
-	superblock.s_inodes_count      = 0;
-	superblock.s_blocks_count      = 0;
+	superblock.s_inodes_count      = NUM_INODES;
+	superblock.s_blocks_count      = NUM_BLOCKS;
 	superblock.s_r_blocks_count    = 0;
-	superblock.s_free_blocks_count = 0;
-	superblock.s_free_inodes_count = 0;
-	superblock.s_first_data_block  = 0; /* First Data Block */
-	superblock.s_log_block_size    = 0; /* 1024 */
-	superblock.s_log_frag_size     = 0; /* 1024 */
-	superblock.s_blocks_per_group  = 0;
-	superblock.s_frags_per_group   = 0;
-	superblock.s_inodes_per_group  = 0;
+	superblock.s_free_blocks_count = 1000;
+	superblock.s_free_inodes_count = 115;
+	superblock.s_first_data_block  = SUPERBLOCK_BLOCKNO; /* First Data Block */
+	superblock.s_log_block_size    = 0; /* 1024 = 1024 << 0 */
+	superblock.s_log_frag_size     = 0; /* 1024 = 1024 << 0  */
+	superblock.s_blocks_per_group  = 8192;
+	superblock.s_frags_per_group   = 8192;
+	superblock.s_inodes_per_group  = 128;
 	superblock.s_mtime             = 0; /* Mount time */
 	superblock.s_wtime             = 0; /* Write time */
 	superblock.s_mnt_count         = 0; /* Number of times mounted so far */
-	superblock.s_max_mnt_count     = 0; /* Make this unlimited */
-	superblock.s_magic             = 0; /* ext2 Signature */
+	superblock.s_max_mnt_count     = -1; /* Make this unlimited */
+	superblock.s_magic             = 0xEF53; /* ext2 Signature */
 	superblock.s_state             = 0; /* File system is clean */
 	superblock.s_errors            = 0; /* Ignore the error (continue on) */
 	superblock.s_minor_rev_level   = 0; /* Leave this as 0 */
@@ -259,12 +259,12 @@ void write_block_group_descriptor_table(int fd) {
 
 	/* These are intentionally incorrectly set as 0, you should set them
 	   correctly and delete this comment */
-	block_group_descriptor.bg_block_bitmap = 0;
-	block_group_descriptor.bg_inode_bitmap = 0;
-	block_group_descriptor.bg_inode_table = 0;
-	block_group_descriptor.bg_free_blocks_count = 0;
-	block_group_descriptor.bg_free_inodes_count = 0;
-	block_group_descriptor.bg_used_dirs_count = 0;
+	block_group_descriptor.bg_block_bitmap = BLOCK_BITMAP_BLOCKNO;
+	block_group_descriptor.bg_inode_bitmap = INODE_BITMAP_BLOCKNO;
+	block_group_descriptor.bg_inode_table = INODE_TABLE_BLOCKNO;
+	block_group_descriptor.bg_free_blocks_count = 1000;
+	block_group_descriptor.bg_free_inodes_count = 115;
+	block_group_descriptor.bg_used_dirs_count = 2;
 
 	ssize_t size = sizeof(block_group_descriptor);
 	if (write(fd, &block_group_descriptor, size) != size) {
