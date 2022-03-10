@@ -194,6 +194,7 @@ void write_superblock(int fd) {
 
 	struct ext2_superblock superblock = {0};
 
+
 	superblock.s_inodes_count      = NUM_INODES;
 	superblock.s_blocks_count      = NUM_BLOCKS;
 	superblock.s_r_blocks_count    = 0;
@@ -253,8 +254,7 @@ void write_block_group_descriptor_table(int fd) {
 
 	struct ext2_block_group_descriptor block_group_descriptor = {0};
 
-	/* These are intentionally incorrectly set as 0, you should set them
-	correctly and delete this comment */
+
 	block_group_descriptor.bg_block_bitmap = BLOCK_BITMAP_BLOCKNO;
 	block_group_descriptor.bg_inode_bitmap = INODE_BITMAP_BLOCKNO;
 	block_group_descriptor.bg_inode_table = INODE_TABLE_BLOCKNO;
@@ -289,8 +289,8 @@ void write_block_bitmap(int fd)
 	}
 	ssize_t size = sizeof(bitmap);
 	if (write(fd, bitmap, size) != size) {
-	errno_exit("write");
-}
+		errno_exit("write");
+	}
 
 }
 
@@ -310,8 +310,8 @@ void write_inode_bitmap(int fd) {
 
 	ssize_t size = sizeof(bitmap);
 	if (write(fd, bitmap, size) != size) {
-	errno_exit("write");
-}
+		errno_exit("write");
+	}
 }
 
 void write_inode(int fd, u32 index, struct ext2_inode *inode) {
@@ -431,7 +431,7 @@ void write_root_dir_block(int fd) {
 	bytes_remaining -= current_entry.rec_len;
 
 	struct ext2_dir_entry parent_entry = {0};
-	dir_entry_set(parent_entry, EXT2_ROOT_INO, "..");
+	dir_entry_set(parent_entry, EXT2_ROOT_INO, ".."); // parent of root is root
 	dir_entry_write(parent_entry, fd);
 
 	bytes_remaining -= parent_entry.rec_len;
@@ -494,6 +494,7 @@ void write_hello_world_file_block(int fd) {
 		errno_exit("lseek");
 	}
 
+	// write "Hello world\n" to hello-world file
 	if (write(fd, "Hello world\n", 13) != 13) {
 		errno_exit("write");
 	}
