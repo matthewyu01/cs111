@@ -307,6 +307,10 @@ void write_inode_bitmap(int fd) {
 	}
 
 	u32 bitmap[256] = {0x1FFF};
+    for (unsigned int i = 4; i < 256; i++){
+	bitmap[i] = 0xFFFFFFFF;
+	}
+
 
 	ssize_t size = sizeof(bitmap);
 	if (write(fd, bitmap, size) != size) {
@@ -406,7 +410,7 @@ void write_inode_table(int fd) {
                         | EXT2_S_IRGRP
                         | EXT2_S_IROTH;
     hello_inode.i_uid = 1000;
-    hello_inode.i_size = 11;
+    hello_inode.i_size = 12;
     hello_inode.i_atime = current_time;
     hello_inode.i_ctime = current_time;
     hello_inode.i_mtime = current_time;
@@ -414,6 +418,9 @@ void write_inode_table(int fd) {
     hello_inode.i_gid = 1000;
     hello_inode.i_links_count = 1;
     hello_inode.i_blocks = 0; // hello inode should be 0 i_blocks
+    hello_inode.i_block[0] = 0x6B6B6A6A;
+    hello_inode.i_block[1] = 0x6B6B6B6B;
+    hello_inode.i_block[2] = 0x00006B6B;
     write_inode(fd, HELLO_INO, &hello_inode);
 
 }
@@ -458,7 +465,6 @@ void write_root_dir_block(int fd) {
 
 	bytes_remaining -= hello_entry.rec_len;
 	
-
 
 	struct ext2_dir_entry fill_entry = {0};
 	fill_entry.rec_len = bytes_remaining;
