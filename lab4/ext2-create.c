@@ -194,8 +194,6 @@ void write_superblock(int fd) {
 
 	struct ext2_superblock superblock = {0};
 
-	/* These are intentionally incorrectly set as 0, you should set them
-	correctly and delete this comment */
 	superblock.s_inodes_count      = NUM_INODES;
 	superblock.s_blocks_count      = NUM_BLOCKS;
 	superblock.s_r_blocks_count    = 0;
@@ -222,8 +220,6 @@ void write_superblock(int fd) {
 	superblock.s_def_resuid        = 0; /* root */
 	superblock.s_def_resgid        = 0; /* root */
 
-	/* You can leave everything below this line the same, delete this
-	comment when you're done the lab */
 	superblock.s_uuid[0] = 0x5A;
 	superblock.s_uuid[1] = 0x1E;
 	superblock.s_uuid[2] = 0xAB;
@@ -279,7 +275,7 @@ void write_block_bitmap(int fd)
 	if (off == -1) {
 		errno_exit("lseek");
 	}
-//bitmap[256] = {0x7FFFFF,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0xFF};
+
 	u32 bitmap[256] = {0x7FFFFF};
 
 	for (unsigned int i = 1; i < 32; i++){
@@ -359,11 +355,6 @@ void write_inode_table(int fd) {
 	/* You should add your 3 other inodes in this function and delete this
 	comment */
 
-//     HELLO_WORLD_INO    12
-//  HELLO_INO          13
-//  LAST_INO           HELLO_INO
-//root ino = 2
-//EXT2_ROOT_INO
     struct ext2_inode root_inode = {0};
     root_inode.i_mode = EXT2_S_IFDIR
                         | EXT2_S_IRUSR
@@ -381,7 +372,7 @@ void write_inode_table(int fd) {
     root_inode.i_dtime = 0;
     root_inode.i_gid = 0;
     root_inode.i_links_count = 3;
-    root_inode.i_blocks = 2; /* These are oddly 512 blocks */
+    root_inode.i_blocks = 2;
     root_inode.i_block[0] = ROOT_DIR_BLOCKNO;
     write_inode(fd, EXT2_ROOT_INO, &root_inode);
 
@@ -399,7 +390,7 @@ void write_inode_table(int fd) {
     hello_world_inode.i_dtime = 0;
     hello_world_inode.i_gid = 1000;
     hello_world_inode.i_links_count = 1;
-    hello_world_inode.i_blocks = 2; /* These are oddly 512 blocks */
+    hello_world_inode.i_blocks = 2; 
     hello_world_inode.i_block[0] = HELLO_WORLD_FILE_BLOCKNO;
     write_inode(fd, HELLO_WORLD_INO, &hello_world_inode);
 
