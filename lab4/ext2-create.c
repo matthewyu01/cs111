@@ -207,7 +207,7 @@ void write_superblock(int fd) {
 	superblock.s_blocks_per_group  = 8192;
 	superblock.s_frags_per_group   = 8192;
 	superblock.s_inodes_per_group  = 128;
-	superblock.s_mtime             = get_current_time(); /* Mount time */
+	superblock.s_mtime             = 0; /* Mount time */
 	superblock.s_wtime             = get_current_time(); /* Write time */
 	superblock.s_mnt_count         = 0; /* Number of times mounted so far */
 	superblock.s_max_mnt_count     = -1; /* Make this unlimited */
